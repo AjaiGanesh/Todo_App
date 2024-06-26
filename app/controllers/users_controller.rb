@@ -1,7 +1,7 @@
-class UsersController < ApplicationController
+class UsersController < BaseController
   before_action :set_user, only: %i[ show edit update destroy ]
   before_action :user_params, only: %i[ create ]
-  # rescue_from StandardError, with: :render_error_response 
+  skip_before_action :check_active_session, only: %i[ create ]
   
   # GET /users or /users.json
   def index
@@ -28,6 +28,17 @@ class UsersController < ApplicationController
       @user.create_user(user_params)
       render json: @user.errors, status: :unprocessable_entity unless @user.valid?
       render json: {data: @user.as_json(:except => [:password_digest, :deleted_at, :last_login_at, :last_logout_at, :num_of_logins, :num_of_logouts, :reset_password_token, :reset_password_requested_at]), message: "User created and please sign in"}, status: :created
+    end
+  end
+
+  def change_password
+    ActiveRecord::Base.transaction do
+      old_password = params.require(:old_password)
+      new_password = params.require(:new_password)
+      confirm_new_password = params.require(:confirm_new_password)
+      raise "Password does not match Confirmation password" if new_password != confirm_new_password
+      @current_user.change_password(old_password, new_password, confirm_new_password)
+      render json: {message: "Password changes successfully, please log in"}, status: :ok
     end
   end
 

@@ -29,7 +29,6 @@ class Session < ApplicationRecord
     end
 
     def logout
-        self.expires_at = Time.now
-        save!
+        self.delete
     end
 end

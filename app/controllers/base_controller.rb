@@ -20,6 +20,8 @@ class BaseController < ApiController
 
     def logout
         @current_user_session.logout
+        @current_user.logout
         render json: {message: "logged out successfully "}, status: :ok
     end
+
 end

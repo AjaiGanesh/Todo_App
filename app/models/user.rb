@@ -29,4 +29,30 @@ class User < ApplicationRecord
         save!
         user_session.auth_token
     end
+
+    def logout
+        self.last_logout_at = Time.now
+        self.num_of_logouts = num_of_logouts.to_i + 1
+        save!
+    end
+
+    def change_password(old_password, new_password, confirm_new_password)
+        unless old_password.present?
+            self.reset_password_token = nil
+            self.reset_password_requested_at = nil
+        else
+            raise "Incorrect existing password given" unless authenticate(old_password)
+        end
+        self.password = new_password
+        logout
+        sessions.each(&:logout)
+    end
+
+    def generate_password_token
+        key = SecureRandom.hex(30)
+        self.reset_password_token = key
+        self.reset_password_requested_at = Time.now
+        save!
+        key
+    end
 end
