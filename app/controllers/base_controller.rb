@@ -24,4 +24,16 @@ class BaseController < ApiController
         render json: {message: "logged out successfully "}, status: :ok
     end
 
+    def current_user
+        render json: @current_user.as_json(:except => [:password_digest, :deleted_at, :last_login_at, :last_logout_at, :num_of_logins, :num_of_logouts, :reset_password_token, :reset_password_requested_at]), status: :ok
+    end
+
+    def status_index
+        status = Status.all
+        render json: {
+            data: status,
+            count: status.count,
+        }
+    end
+
 end

@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_25_110852) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_28_005046) do
+  create_table "comments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "task_id"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id"], name: "index_comments_on_task_id"
+  end
+
   create_table "priorities", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -18,11 +26,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_25_110852) do
   end
 
   create_table "projects", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "name"
+    t.bigint "user_id"
+    t.integer "parent_id"
+    t.string "description"
     t.integer "status", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_projects_on_name"
+    t.index ["description"], name: "index_projects_on_description"
+    t.index ["parent_id"], name: "index_projects_on_parent_id"
+    t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
   create_table "sessions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -36,15 +48,28 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_25_110852) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
-  create_table "tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "priority"
-    t.string "label"
-    t.string "status"
-    t.text "description"
-    t.datetime "start_date_at"
-    t.datetime "due_date_at"
+  create_table "statuses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "project_id"
+    t.bigint "priority_id"
+    t.string "label"
+    t.bigint "status_id"
+    t.string "description", null: false
+    t.datetime "start_date_at"
+    t.datetime "due_date_at"
+    t.integer "parent_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["description"], name: "index_tasks_on_description"
+    t.index ["parent_id"], name: "index_tasks_on_parent_id"
+    t.index ["priority_id"], name: "index_tasks_on_priority_id"
+    t.index ["project_id"], name: "index_tasks_on_project_id"
+    t.index ["status_id"], name: "index_tasks_on_status_id"
   end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -67,5 +92,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_25_110852) do
     t.index ["last_name"], name: "index_users_on_last_name"
   end
 
+  add_foreign_key "comments", "tasks"
+  add_foreign_key "projects", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "tasks", "priorities"
+  add_foreign_key "tasks", "projects"
+  add_foreign_key "tasks", "statuses"
 end

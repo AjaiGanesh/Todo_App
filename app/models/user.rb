@@ -1,6 +1,6 @@
 class User < ApplicationRecord
     has_secure_password
-    has_many :sessions
+    has_many :sessions, dependent: :destroy
     validates :first_name, presence: true, uniqueness: { case_sensitive: false, message: "Already taken"},format: { with: /\A[a-zA-Z0-9_]*[a-zA-Z][a-zA-Z0-9_]*\z/, message: "Required condition not met" }
     validates :password_digest, presence: true
     validates :email, presence: true, uniqueness: { case_sensitive: false, message: 'Address is Already Registered !' }, format: { with: /\A[^@\s]+@[^@\s]+\z/i }
