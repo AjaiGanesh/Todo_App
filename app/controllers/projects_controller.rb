@@ -1,4 +1,4 @@
-class ProjectsController < ApplicationController
+class ProjectsController < BaseController
   before_action :set_project, only: %i[ show edit update destroy ]
 
   # GET /projects or /projects.json
@@ -11,64 +11,46 @@ class ProjectsController < ApplicationController
   end
 
   # GET /projects/1 or /projects/1.json
-#   def show
-#   end
+  def show
+  end
 
-#   # GET /projects/new
-#   def new
-#     @project = Project.new
-#   end
+  # GET /projects/new
+  def new
+    @project = Project.new
+  end
 
-#   # GET /projects/1/edit
-#   def edit
-#   end
+  # GET /projects/1/edit
+  def edit
+  end
 
-#   # POST /projects or /projects.json
-#   def create
-#     @project = Project.new(project_params)
+  # POST /projects or /projects.json
+  def create
+    @project = Project.new(project_params)
+    @project.create_project(@current_user)
+    render json: { data: @project, message: "Project Created Successfully"}, status: :created
+  end
 
-#     respond_to do |format|
-#       if @project.save
-#         format.html { redirect_to project_url(@project), notice: "Project was successfully created." }
-#         format.json { render :show, status: :created, location: @project }
-#       else
-#         format.html { render :new, status: :unprocessable_entity }
-#         format.json { render json: @project.errors, status: :unprocessable_entity }
-#       end
-#     end
-#   end
+  # PATCH/PUT /projects/1 or /projects/1.json
+  def update
+    @project.move_or_update_project(params)
+    render json: { data: @project, message: "Project Updated Successfully"}
+  end
 
-#   # PATCH/PUT /projects/1 or /projects/1.json
-#   def update
-#     respond_to do |format|
-#       if @project.update(project_params)
-#         format.html { redirect_to project_url(@project), notice: "Project was successfully updated." }
-#         format.json { render :show, status: :ok, location: @project }
-#       else
-#         format.html { render :edit, status: :unprocessable_entity }
-#         format.json { render json: @project.errors, status: :unprocessable_entity }
-#       end
-#     end
-#   end
+  # DELETE /projects/1 or /projects/1.json
+  def destroy
+    @project.destroy
+    render json: { message: "Deleted Successfully"}, status: :ok
+  end
 
-#   # DELETE /projects/1 or /projects/1.json
-#   def destroy
-#     @project.destroy
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_project
+      @project = Project.find_by(id: params[:id])
+      raise "No project found:status:404" unless @project.present?
+    end
 
-#     respond_to do |format|
-#       format.html { redirect_to projects_url, notice: "Project was successfully destroyed." }
-#       format.json { head :no_content }
-#     end
-#   end
-
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_project
-#       @project = Project.find(params[:id])
-#     end
-
-#     # Only allow a list of trusted parameters through.
-#     def project_params
-#       params.fetch(:project, {})
-#     end
+    # Only allow a list of trusted parameters through.
+    def project_params
+      params.require(:project).permit(:description, :parent_id)
+    end
 end
